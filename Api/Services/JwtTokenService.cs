@@ -4,9 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services
 {
-    public class JwtTokenService
+    public static class JwtTokenService
     {
-        public string Generate(Models.Entities.User user)
+        public static string Generate(Models.Entities.User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = AuthOptions.GetSymmetricSecurityKey().Key;
@@ -14,8 +14,7 @@ namespace Api.Services
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, user.FullName),
-                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Name, user.UserName),
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

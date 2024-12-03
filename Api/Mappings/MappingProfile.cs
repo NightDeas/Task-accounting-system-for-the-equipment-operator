@@ -1,6 +1,6 @@
-﻿using Api.Models.Entities;
+﻿using Api.Models.DTO;
+using Api.Models.Entities;
 using Api.Models.Requests;
-using Api.Models.Responses;
 using AutoMapper;
 
 namespace Api.Mappings
@@ -10,7 +10,7 @@ namespace Api.Mappings
         public MappingProfile()
         {
             CreateMap<Models.Entities.User, UserDTO>().ReverseMap();
-            CreateMap<RegisterDTO, User>();
+            CreateMap<RegisterDTORequest, User>();
         }
     }
 }

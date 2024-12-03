@@ -2,7 +2,7 @@
 
 namespace Api.Models.Requests
 {
-    public class RegisterDTO
+    public class RegisterDTORequest
     {
         [Required]
         [MinLength(3)]
