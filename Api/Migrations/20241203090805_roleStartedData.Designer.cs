@@ -4,6 +4,7 @@ using Api.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20241203090805_roleStartedData")]
+    partial class roleStartedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,15 +55,13 @@ namespace Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e2690d33-8916-4419-94a2-507cc888381f"),
-                            Name = "Operator",
-                            NormalizedName = "OPERATOR"
+                            Id = new Guid("01d72217-bb22-4dd2-ac45-d68107e5a570"),
+                            Name = "Operator"
                         },
                         new
                         {
-                            Id = new Guid("70b10473-a669-4f20-b0b5-a917c300a8b4"),
-                            Name = "Administrator",
-                            NormalizedName = "ADMINISTRATOR"
+                            Id = new Guid("abb30232-f844-4e5d-b7b5-06a79e91d857"),
+                            Name = "Administrator"
                         });
                 });
 

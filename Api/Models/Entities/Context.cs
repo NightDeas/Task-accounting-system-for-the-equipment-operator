@@ -20,12 +20,14 @@ namespace Api.Models.Entities
                 new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Operator"
+                    Name = "Operator",
+                    NormalizedName = "OPERATOR"
                 },
                    new()
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Administrator"
+                    Name = "Administrator",
+                    NormalizedName = "ADMINISTRATOR"
                 },
             });
 
