@@ -41,6 +41,7 @@ namespace Api.Controllers
             }
             user.UserName = register.Login;
             var createResult = await _userManager.CreateAsync(user, register.Password);
+            await _userManager.AddToRoleAsync(user, "OPERATOR");
             if (createResult.Succeeded)
             {
                 var token = Services.JwtTokenService.Generate(user);
@@ -73,11 +74,17 @@ namespace Api.Controllers
         [HttpGet("User/Current")]
         public async Task<IActionResult> GetUser()
         {
+
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
-
-            return Ok(new { Name = User.Identity.Name});
+            var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            return Ok(new
+            {
+                Name = User.FindFirst(ClaimTypes.Name).Value,
+                Roles = roles
+            });
         }
     }
 }
