@@ -48,9 +48,19 @@ namespace Api
                             In = ParameterLocation.Header,
                         },
                         new List<string>()
-                            }
-                    });
+                     }
                 });
+
+            });
+
+            var supporedCultures = new[] { "en", "ru" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture(supporedCultures[0])
+                .AddSupportedCultures(supporedCultures)
+                .AddSupportedUICultures(supporedCultures);
+            app.UseRequestLocalization(localizationOptions);
+
+            builder.Services.AddLocalization(options=> options.ResourcesPath = "Models/DTO/Languages");
 
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
