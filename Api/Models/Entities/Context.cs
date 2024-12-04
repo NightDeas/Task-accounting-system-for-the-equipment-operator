@@ -15,7 +15,7 @@ namespace Api.Models.Entities
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-<<<<<<< HEAD
+
             builder.Entity<Role>().HasData(new List<Role>()
             {
                 new()
@@ -31,9 +31,6 @@ namespace Api.Models.Entities
                     NormalizedName = "ADMINISTRATOR"
                 },
             });
-
-=======
->>>>>>> origin/TaskController
 
             base.OnModelCreating(builder);
         }

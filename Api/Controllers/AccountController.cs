@@ -85,11 +85,6 @@ namespace Api.Controllers
         [HttpGet("User/Current")]
         public async Task<IActionResult> GetUser()
         {
-<<<<<<< HEAD
-
-=======
-            
->>>>>>> origin/TaskController
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
