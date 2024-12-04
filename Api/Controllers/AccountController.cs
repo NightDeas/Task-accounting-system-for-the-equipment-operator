@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace Api.Controllers
 {
@@ -22,13 +23,15 @@ namespace Api.Controllers
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IEmployeeService _employeeService;
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService, IEmployeeService employeeService)
+        private readonly IStringLocalizer<AccountController> _localizer;
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService, IEmployeeService employeeService, IStringLocalizer<AccountController> localizer)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
             _userService = userService;
             _employeeService = employeeService;
+            _localizer = localizer;
         }
 
         [ProducesResponseType(typeof(RegisterResponse), 200)]
