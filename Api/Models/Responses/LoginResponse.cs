@@ -1,6 +1,6 @@
 ﻿namespace Api.Models.Responses
 {
-    public class RegisterDTOResponse
+    public class LoginResponse
     {
         public string AccessToken { get; set; }
     }

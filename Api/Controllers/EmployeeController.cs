@@ -22,7 +22,7 @@ namespace Api.Controllers
             var user = await _userService.GetCurrentUser();
             if (user == null)
                 return Unauthorized();
-            var employee = await _employeeService.GetByUserAsync(user.Id);
+            var employee = await _employeeService.GetByUser(user.Id);
             return Ok(employee);
         }
     }

@@ -25,7 +25,7 @@ namespace Api.Services
             return result;
         }
 
-        public async Task<EmployeeDTO> GetByUserAsync(Guid userId)
+        public async Task<EmployeeDTO> GetByUser(Guid userId)
         {
             var employee = await _employeeRepository.GetByUserAsync(userId);
             var employeeDTO = _mapper.Map<EmployeeDTO>(employee);

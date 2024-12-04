@@ -30,10 +30,10 @@ namespace Api.Controllers
             _userService = userService;
             _employeeService = employeeService;
         }
-        [ProducesResponseType(typeof(RegisterDTOResponse), 200)]
+        [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTORequest register)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest register)
         {
             var user = _mapper.Map<User>(register);
             var anyUser = await _userManager.FindByNameAsync(register.Login);
@@ -55,7 +55,7 @@ namespace Api.Controllers
                 };
                 await _employeeService.Add(employeeRequest);
                 var token = Services.JwtTokenService.Generate(user);
-                var result = new RegisterDTOResponse()
+                var result = new RegisterResponse()
                 {
                     AccessToken = token,
                 };
@@ -63,7 +63,7 @@ namespace Api.Controllers
             }
             return BadRequest();
         }
-        [ProducesResponseType(typeof(RegisterDTOResponse), 200)]
+        [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Login")]
         public async Task<IActionResult> Login(string login, string password)
