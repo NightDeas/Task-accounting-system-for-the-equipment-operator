@@ -70,6 +70,7 @@ namespace Api
             builder.Services.AddDbContext<Context>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.EnableSensitiveDataLogging();
             });
 
             builder.Services.AddIdentity<User, Role>(options=>
@@ -89,6 +90,7 @@ namespace Api
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
+
                 options.RequireHttpsMetadata = true;
                 options.SaveToken = false;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -112,8 +114,6 @@ namespace Api
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseAuthorization();
 
 
             app.MapControllers();

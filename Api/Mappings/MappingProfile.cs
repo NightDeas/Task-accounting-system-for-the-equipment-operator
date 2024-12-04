@@ -29,7 +29,7 @@ namespace Api.Mappings
             CreateMap<Models.Entities.Task, TaskDTO>().ReverseMap();
             CreateMap<TaskRequest, Models.Entities.Task>();
             CreateMap<TaskCreateRequest, Models.Entities.Task>();
-            CreateMap<TaskResponse, Models.Entities.Task>();
+            CreateMap<TaskResponse, Models.Entities.Task>().ReverseMap();
             CreateMap<TaskResponse, TaskRequest>();
 
             #endregion

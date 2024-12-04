@@ -15,7 +15,6 @@ namespace Api.Models.Entities
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
             builder.Entity<Role>().HasData(new List<Role>()
             {
                 new()
