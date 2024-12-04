@@ -21,12 +21,14 @@ namespace Api.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService)
+        private readonly IEmployeeService _employeeService;
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService, IEmployeeService employeeService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
             _userService = userService;
+            _employeeService = employeeService;
         }
         [ProducesResponseType(typeof(RegisterDTOResponse), 200)]
         [ProducesResponseType(400)]
@@ -43,6 +45,15 @@ namespace Api.Controllers
             var createResult = await _userManager.CreateAsync(user, register.Password);
             if (createResult.Succeeded)
             {
+                EmployeeRequest employeeRequest = new()
+                {
+                    UserId = user.Id,
+                    FirstName = register.FirstName,
+                    LastName = register.LastName,
+                    Patronymic = register.Patronymic,
+
+                };
+                await _employeeService.Add(employeeRequest);
                 var token = Services.JwtTokenService.Generate(user);
                 var result = new RegisterDTOResponse()
                 {
@@ -73,6 +84,7 @@ namespace Api.Controllers
         [HttpGet("User/Current")]
         public async Task<IActionResult> GetUser()
         {
+            
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();

@@ -56,6 +56,9 @@ namespace Api
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
 
+            builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
             IConfigurationRoot configuration = new ConfigurationBuilder()
            .SetBasePath(Directory.GetCurrentDirectory())
            .AddJsonFile("appsettings.json")

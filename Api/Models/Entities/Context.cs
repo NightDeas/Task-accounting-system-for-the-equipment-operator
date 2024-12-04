@@ -18,5 +18,6 @@ namespace Api.Models.Entities
             base.OnModelCreating(builder);
         }
 
+        public DbSet<Employee> Employees { get; set; }  
     }
 }
