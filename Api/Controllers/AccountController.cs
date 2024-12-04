@@ -85,14 +85,13 @@ namespace Api.Controllers
         [HttpGet("User/Current")]
         public async Task<IActionResult> GetUser()
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
+            var userDTO = await _userService.GetCurrentUser();
+            if (userDTO == null)
                 return Unauthorized();
-            var user = await _userManager.FindByIdAsync(userId);
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(_mapper.Map<User>(userDTO));
             return Ok(new
             {
-                Name = User.FindFirst(ClaimTypes.Name).Value,
+                userDTO.Login,
                 Roles = roles
             });
         }
