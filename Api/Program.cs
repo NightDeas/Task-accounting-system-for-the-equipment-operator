@@ -58,7 +58,6 @@ namespace Api
                 .SetDefaultCulture(supporedCultures[0])
                 .AddSupportedCultures(supporedCultures)
                 .AddSupportedUICultures(supporedCultures);
-            app.UseRequestLocalization(localizationOptions);
 
             builder.Services.AddLocalization(options=> options.ResourcesPath = "Models/DTO/Languages");
 
