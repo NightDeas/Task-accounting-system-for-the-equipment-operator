@@ -4,7 +4,16 @@ namespace Api.Services.Intefraces
 {
     public interface IUserService
     {
-        Task<UserDTO> GetUser(string login);
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        //Task<UserDTO> GetUser(string login);
+        /// <summary>
+        /// Получить текущего пользователя
+        /// </summary>
+        /// <returns></returns>
+        Task<UserDTO> GetCurrentUser();
     }
 }

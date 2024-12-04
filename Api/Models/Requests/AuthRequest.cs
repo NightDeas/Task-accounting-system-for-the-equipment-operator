@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Models.Requests
 {
-    public class AuthDTO
+    public class AuthRequest
     {
         [Required]
         public string Login { get; set; }

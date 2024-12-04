@@ -15,6 +15,7 @@ namespace Api.Models.Entities
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+<<<<<<< HEAD
             builder.Entity<Role>().HasData(new List<Role>()
             {
                 new()
@@ -31,9 +32,14 @@ namespace Api.Models.Entities
                 },
             });
 
+=======
+>>>>>>> origin/TaskController
 
             base.OnModelCreating(builder);
         }
+
+        public DbSet<Task> Tasks { get; set; }
+        public DbSet<Employee> Employees { get; set; }  
 
     }
 }
