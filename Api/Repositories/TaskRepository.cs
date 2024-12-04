@@ -23,38 +23,46 @@ namespace Api.Repositories
 
         public async Task<Models.Entities.Task> GetAsync(Guid taskId)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == taskId);
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == taskId);
             return task;
         }
 
         public async Task<List<Models.Entities.Task>> GetAllAsync()
         {
-            return await _context.Tasks.ToListAsync();
+            return await _context.Tasks
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public async Task<List<Models.Entities.Task>> GetAllByEmployeeAsync(Guid EmployeeId)
+        public async Task<List<Models.Entities.Task>> GetAllByEmployeeAsync(Guid employeeId)
         {
-            return await _context.Tasks.ToListAsync();
+            return await _context.Tasks
+                .AsNoTracking()
+                .Where(x=> x.EmployeeId == employeeId)
+                .ToListAsync();
         }
 
         public async System.Threading.Tasks.Task Remove(Guid taskId)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(x=> x.Id == taskId);
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == taskId);
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
         }
 
         public async Task<Models.Entities.Task> UpdateAsync(Guid taskId, Models.Entities.Task updateTask)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == taskId);
-            task = new()
-            {
-                DeadLine = updateTask.DeadLine,
-                Description = updateTask.Description,
-                EmployeeId = updateTask.EmployeeId,
-                IsCompleted = updateTask.IsCompleted,
-                Created = updateTask.Created,
-            };
+            var task = await _context.Tasks
+                //.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == taskId);
+            task.DeadLine = updateTask.DeadLine;
+            task.Description = updateTask.Description;
+            task.EmployeeId = updateTask.EmployeeId;
+            task.IsCompleted = updateTask.IsCompleted;
+            task.Created = updateTask.Created;
             _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
             return task;

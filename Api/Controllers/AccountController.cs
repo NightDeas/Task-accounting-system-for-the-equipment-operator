@@ -30,6 +30,7 @@ namespace Api.Controllers
             _userService = userService;
             _employeeService = employeeService;
         }
+
         [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Register")]
@@ -64,6 +65,42 @@ namespace Api.Controllers
             }
             return BadRequest();
         }
+
+        [ProducesResponseType(typeof(RegisterResponse), 200)]
+        [ProducesResponseType(400)]
+        [HttpPost("Register/isAdmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterRequest register)
+        {
+            var user = _mapper.Map<User>(register);
+            var anyUser = await _userManager.FindByNameAsync(register.Login);
+            if (anyUser != null)
+            {
+                return BadRequest("Пользователь с таким логином уже существует");
+            }
+            user.UserName = register.Login;
+            var createResult = await _userManager.CreateAsync(user, register.Password);
+            await _userManager.AddToRoleAsync(user, "ADMINISTRATOR");
+            if (createResult.Succeeded)
+            {
+                EmployeeRequest employeeRequest = new()
+                {
+                    UserId = user.Id,
+                    FirstName = register.FirstName,
+                    LastName = register.LastName,
+                    Patronymic = register.Patronymic,
+
+                };
+                await _employeeService.Add(employeeRequest);
+                var token = Services.JwtTokenService.Generate(user);
+                var result = new RegisterResponse()
+                {
+                    AccessToken = token,
+                };
+                return Ok(token);
+            }
+            return BadRequest();
+        }
+
         [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Login")]

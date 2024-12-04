@@ -16,11 +16,12 @@ namespace Api.Controllers
         private readonly IEmployeeService _employeeService;
         private readonly IMapper _mapper;
 
-        public TaskController(ITaskService taskService, IUserService userService, IEmployeeService employeeService)
+        public TaskController(ITaskService taskService, IUserService userService, IEmployeeService employeeService, IMapper mapper)
         {
             _taskService = taskService;
             _userService = userService;
             _employeeService = employeeService;
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -41,7 +42,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [Authorize("Administrator")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Post(TaskCreateRequest task)
         {
             var user = await _userService.GetCurrentUser();
@@ -53,7 +54,7 @@ namespace Api.Controllers
 
 
         [HttpPut]
-        [Authorize("Administrator")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateTask(Guid taskId, TaskRequest updateTask)
         {
             var user = await _userService.GetCurrentUser();
@@ -72,6 +73,8 @@ namespace Api.Controllers
             var task = await _taskService.Get(taskId);
             if (task == null)
                 return NotFound();
+            if (task.EmployeeId != (await _userService.GetCurrentUser()).Id)
+                return Forbid();
             task.IsCompleted = isCompleted;
             var taskRequest = _mapper.Map<TaskRequest>(task);
             var taskResult = await _taskService.UpdateAsync(taskId, taskRequest);
