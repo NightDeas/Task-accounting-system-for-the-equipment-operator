@@ -24,5 +24,11 @@ namespace Api.Repositories
         {
             return await _context.Employees.FirstOrDefaultAsync(x => x.UserId == userId);
         }
+
+        public async Task<List<Employee>> GetEmployees()
+        {
+            var result = await _context.Employees.ToListAsync();
+            return result;
+        }
     }
 }

@@ -31,5 +31,12 @@ namespace Api.Services
             var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
             return employeeDTO;
         }
+
+        public async Task<List<EmployeeDTO>> GetEmployees()
+        {
+            var employees = await _employeeRepository.GetEmployees();
+            var result = employees.Select(x => _mapper.Map<EmployeeDTO>(x)).ToList();
+            return result;
+        }
     }
 }

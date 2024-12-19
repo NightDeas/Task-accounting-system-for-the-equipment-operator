@@ -6,6 +6,7 @@ using Api.Models.Responses;
 using Api.Services;
 using Api.Services.Intefraces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +25,9 @@ namespace Api.Controllers
         private readonly IUserService _userService;
         private readonly IEmployeeService _employeeService;
         private readonly IStringLocalizer<AccountController> _localizer;
+
+        const string adminRoleString = "ADMINISTRATOR";
+        const string userRoleString = "OPERATOR";
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IUserService userService, IEmployeeService employeeService, IStringLocalizer<AccountController> localizer)
         {
             _userManager = userManager;
@@ -33,7 +37,7 @@ namespace Api.Controllers
             _employeeService = employeeService;
             _localizer = localizer;
         }
-
+        [AllowAnonymous]
         [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Register")]
@@ -47,7 +51,7 @@ namespace Api.Controllers
             }
             user.UserName = register.Login;
             var createResult = await _userManager.CreateAsync(user, register.Password);
-            await _userManager.AddToRoleAsync(user, "OPERATOR");
+            await _userManager.AddToRoleAsync(user, userRoleString);
             if (createResult.Succeeded)
             {
                 EmployeeRequest employeeRequest = new()
@@ -59,7 +63,8 @@ namespace Api.Controllers
 
                 };
                 await _employeeService.Add(employeeRequest);
-                var token = Services.JwtTokenService.Generate(user);
+                var rolesUser = await _userManager.GetRolesAsync(user);
+                var token = Services.JwtTokenService.Generate(user, rolesUser);
                 var result = new RegisterResponse()
                 {
                     AccessToken = token,
@@ -68,7 +73,7 @@ namespace Api.Controllers
             }
             return BadRequest();
         }
-
+        [AllowAnonymous]
         [ProducesResponseType(typeof(RegisterResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Register/isAdmin")]
@@ -82,7 +87,7 @@ namespace Api.Controllers
             }
             user.UserName = register.Login;
             var createResult = await _userManager.CreateAsync(user, register.Password);
-            await _userManager.AddToRoleAsync(user, "ADMINISTRATOR");
+            await _userManager.AddToRoleAsync(user, adminRoleString);
             if (createResult.Succeeded)
             {
                 EmployeeRequest employeeRequest = new()
@@ -94,7 +99,8 @@ namespace Api.Controllers
 
                 };
                 await _employeeService.Add(employeeRequest);
-                var token = Services.JwtTokenService.Generate(user);
+                var rolesUser = await _userManager.GetRolesAsync(user);
+                var token = Services.JwtTokenService.Generate(user, rolesUser);
                 var result = new RegisterResponse()
                 {
                     AccessToken = token,
@@ -103,29 +109,42 @@ namespace Api.Controllers
             }
             return BadRequest();
         }
-
-        [ProducesResponseType(typeof(RegisterResponse), 200)]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(LoginResponse), 200)]
         [ProducesResponseType(400)]
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(string login, string password)
+        public async Task<IActionResult> Login([FromBody] Models.Requests.AuthRequest loginRequest)
         {
-            User user = new()
+            var user = await _userManager.FindByNameAsync(loginRequest.Login);
+            if (user == null)
             {
-                UserName = login,
-            };
-            var signResult = await _signInManager.PasswordSignInAsync(login, password, false, false);
-            if (signResult.Succeeded)
-            {
-                var token = JwtTokenService.Generate(user);
-                return Ok(token);
+                return BadRequest("Неверный логин или пароль");
             }
-            return BadRequest("Неверный логин или пароль");
+
+            var signResult = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, lockoutOnFailure: false);
+            if (!signResult.Succeeded)
+            {
+                return BadRequest("Неверный логин или пароль");
+            }
+
+            var rolesUser = await _userManager.GetRolesAsync(user);
+
+            // Генерируем JWT-токен
+            var token = JwtTokenService.Generate(user, rolesUser);
+
+            var response = new LoginResponse
+            {
+                AccessToken = token,
+            };
+
+            return Ok(response);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("User/Current")]
         public async Task<IActionResult> GetUser()
         {
-            var userDTO = await _userService.GetCurrentUser();
+            var userDTO = await _userManager.GetUserAsync(User);
             if (userDTO == null)
                 return Unauthorized();
             var roles = await _userManager.GetRolesAsync(_mapper.Map<User>(userDTO));

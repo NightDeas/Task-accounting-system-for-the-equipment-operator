@@ -1,8 +1,13 @@
-﻿using Api.Models.Requests;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Api.Models.Entities;
+using Api.Models.Requests;
+using Api.Models.Requests.Params;
 using Api.Services.Intefraces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -15,74 +20,82 @@ namespace Api.Controllers
         private readonly IUserService _userService;
         private readonly IEmployeeService _employeeService;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public TaskController(ITaskService taskService, IUserService userService, IEmployeeService employeeService, IMapper mapper)
+        public TaskController(ITaskService taskService, IUserService userService, IEmployeeService employeeService, IMapper mapper, UserManager<User> userManager)
         {
             _taskService = taskService;
             _userService = userService;
             _employeeService = employeeService;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery]TaskQueryParams @params)
         {
-            var tasks = await _taskService.GetAllAsync();
+            var tasks = await _taskService.GetAllAsync(@params);
             return Ok(tasks);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("currentEmployee")]
-        public async Task<IActionResult> GetAllForEmployee()
+        public async Task<IActionResult> GetAllForEmployee([FromQuery]TaskQueryParams @params)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return Unauthorized();
-            var tasks = await _taskService.GetAllByEmployee(user.Id);
+            var employeeId = (await _employeeService.GetByUser(user.Id)).Id;
+            var tasks = await _taskService.GetAllByEmployee(employeeId, @params);
             return Ok(tasks);
         }
 
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [AllowAnonymous]
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Post(TaskCreateRequest task)
         {
-            var user = await _userService.GetCurrentUser();
-            if (user == null)
-                return Unauthorized();
+            //var user = await _userManager.GetUserAsync(User);
+            //if (user == null)
+            //    return Unauthorized();
+            //var role = await _userManager.GetRolesAsync(user);
+            //if (!role.Contains("ADMINISTRATOR"))
+            //    return Forbid();
             var id = await _taskService.AddAsync(task);
             return Ok(id);
         }
 
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
-        [Authorize(Roles = "Administrator")]
+        //[Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateTask(Guid taskId, TaskRequest updateTask)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return Unauthorized();
+            var role = await _userManager.GetRolesAsync(user);
+            if (!role.Contains("ADMINISTRATOR"))
+                return Forbid();
             var taskResult = await _taskService.UpdateAsync(taskId, updateTask);
             return Ok(taskResult);
         }
 
-        [HttpPut("{taskId}/taskCompleted/{isCompleted}")]
-        public async Task<IActionResult> TaskCompleted(Guid taskId, bool isCompleted)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPut("taskCompleted")]
+        public async Task<IActionResult> TaskCompleted(UpdateTaskCompleted request)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return Unauthorized();
-            var task = await _taskService.Get(taskId);
+
+            var task = await _taskService.Get(request.TaskId);
             if (task == null)
                 return NotFound();
-            if (task.EmployeeId != (await _userService.GetCurrentUser()).Id)
-                return Forbid();
-            task.IsCompleted = isCompleted;
+          
+            task.IsCompleted = request.IsCompleted;
             var taskRequest = _mapper.Map<TaskRequest>(task);
-            var taskResult = await _taskService.UpdateAsync(taskId, taskRequest);
+            var taskResult = await _taskService.UpdateAsync(request.TaskId, taskRequest);
             return Ok(taskResult);
         }
-
-
-
-
     }
 }

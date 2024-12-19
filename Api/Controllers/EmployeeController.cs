@@ -19,11 +19,17 @@ namespace Api.Controllers
         [HttpGet("current")]
         public async Task<IActionResult> Get()
         {
-            var user = await _userService.GetCurrentUser();
+            var user = _userService.GetCurrentUser();
             if (user == null)
                 return Unauthorized();
-            var employee = await _employeeService.GetByUser(user.Id);
+            var employee = await _employeeService.GetByUser(user.Result.Id);
             return Ok(employee);
+        }
+        [HttpGet("all")]
+        public async Task<IActionResult> GetEmployees()
+        {
+            var result = await _employeeService.GetEmployees();
+            return Ok(result);
         }
     }
 }

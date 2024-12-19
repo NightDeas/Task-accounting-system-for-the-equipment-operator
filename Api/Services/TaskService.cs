@@ -1,8 +1,10 @@
 ﻿using Api.Models.Requests;
+using Api.Models.Requests.Params;
 using Api.Models.Responses;
 using Api.Repositories.Interfaces;
 using Api.Services.Intefraces;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Services
 {
@@ -31,21 +33,20 @@ namespace Api.Services
             return taskResponse;
         }
 
-        public async Task<List<TaskResponse>> GetAllAsync()
+        public async Task<List<TaskResponse>> GetAllAsync(TaskQueryParams @params)
         {
-            var entitiesTask = await _taskRepository.GetAllAsync();
+            var entitiesTask = await _taskRepository.GetAllAsync(@params);
             List<TaskResponse> tasks = new();
             foreach (var task in entitiesTask)
             {
                 tasks.Add(_mapper.Map<TaskResponse>(task));
             }
             return tasks;
-            
         }
 
-        public async Task<List<TaskResponse>> GetAllByEmployee(Guid employeeId)
+        public async Task<List<TaskResponse>> GetAllByEmployee(Guid employeeId, TaskQueryParams @params)
         {
-            var entitiesTask = await _taskRepository.GetAllByEmployeeAsync(employeeId);
+            var entitiesTask = await _taskRepository.GetAllByEmployeeAsync(employeeId, @params);
             List<TaskResponse> tasks = new();
             foreach (var task in entitiesTask)
             {

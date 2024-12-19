@@ -8,5 +8,6 @@ namespace Api.Services.Intefraces
     {
         Task<Guid> Add(EmployeeRequest employeeRequest);
         Task<EmployeeDTO> GetByUser(Guid userId);
+        Task<List<EmployeeDTO>> GetEmployees();
     }
 }

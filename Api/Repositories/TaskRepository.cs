@@ -1,5 +1,7 @@
 ﻿using Api.Models.Entities;
+using Api.Models.Requests.Params;
 using Api.Repositories.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories
@@ -29,18 +31,28 @@ namespace Api.Repositories
             return task;
         }
 
-        public async Task<List<Models.Entities.Task>> GetAllAsync()
+        public async Task<List<Models.Entities.Task>> GetAllAsync(TaskQueryParams @params)
         {
-            return await _context.Tasks
-                .AsNoTracking()
+            var query = _context.Tasks.AsQueryable();
+
+            if (@params.IsCompleted != null)
+                query = query.Where(x => x.IsCompleted == @params.IsCompleted);
+
+            return await query
+                .Include(x => x.Employee)
                 .ToListAsync();
         }
 
-        public async Task<List<Models.Entities.Task>> GetAllByEmployeeAsync(Guid employeeId)
+        public async Task<List<Models.Entities.Task>> GetAllByEmployeeAsync(Guid employeeId, TaskQueryParams @params)
         {
-            return await _context.Tasks
-                .AsNoTracking()
-                .Where(x=> x.EmployeeId == employeeId)
+            var query = _context.Tasks
+                .AsQueryable()
+                .Where(x => x.EmployeeId == employeeId);
+            if (@params.IsCompleted != null)
+                query = query.Where(x => x.IsCompleted == @params.IsCompleted);
+
+            return await query
+                .Include(x => x.Employee)
                 .ToListAsync();
         }
 
@@ -53,7 +65,7 @@ namespace Api.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Models.Entities.Task> UpdateAsync(Guid taskId, Models.Entities.Task updateTask)
+        public async Task<Models.Entities.Task> UpdateAsync(Guid taskId, [FromBody]Models.Entities.Task updateTask)
         {
             var task = await _context.Tasks
                 //.AsNoTracking()

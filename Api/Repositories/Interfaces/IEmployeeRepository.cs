@@ -6,5 +6,6 @@ namespace Api.Repositories.Interfaces
     {
         Task<Guid> AddAsync(Employee employee);
         Task<Employee> GetByUserAsync(Guid userId);
+        Task<List<Employee>> GetEmployees();
     }
 }

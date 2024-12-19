@@ -7,6 +7,7 @@ using Api.Services.Intefraces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -29,27 +30,24 @@ namespace Api
                 {
                     Description = "Use: Bearer {token}",
                     Name = "Authorization",
-                    In = ParameterLocation.Query,
+                    In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
-                        },
-                        new List<string>()
+                 {
+                     {
+                         new OpenApiSecurityScheme
+                         {
+                             Reference = new OpenApiReference
+                             {
+                                 Type = ReferenceType.SecurityScheme,
+                                 Id = "Bearer"
+                             }
+                         },
+                         new string[] {}
                      }
-                });
+                 });
 
             });
 
@@ -59,7 +57,7 @@ namespace Api
                 .AddSupportedCultures(supporedCultures)
                 .AddSupportedUICultures(supporedCultures);
 
-            builder.Services.AddLocalization(options=> options.ResourcesPath = "Models/DTO/Languages");
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Models/DTO/Languages");
 
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -82,7 +80,7 @@ namespace Api
                 options.EnableSensitiveDataLogging();
             });
 
-            builder.Services.AddIdentity<User, Role>(options=>
+            builder.Services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
@@ -100,21 +98,34 @@ namespace Api
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
 
-                options.RequireHttpsMetadata = true;
+                options.RequireHttpsMetadata = false;
                 options.SaveToken = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = true,
-                    ValidateActor = true,
-                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
                     ValidateLifetime = true,
-                    IssuerSigningKey = Services.AuthOptions.GetSymmetricSecurityKey(),
                     ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = Services.AuthOptions.GetSymmetricSecurityKey(),
                 };
             });
-            
-            var app = builder.Build();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
+
+            var app = builder.Build();
+            app.UseCors("AllowAllOrigins");
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -123,7 +134,6 @@ namespace Api
             }
 
             app.UseHttpsRedirection();
-
 
             app.MapControllers();
 
