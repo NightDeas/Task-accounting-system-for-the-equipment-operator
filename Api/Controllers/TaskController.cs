@@ -4,6 +4,7 @@ using Api.Models.Requests;
 using Api.Models.Requests.Params;
 using Api.Services.Intefraces;
 using AutoMapper;
+using Azure.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -44,14 +45,14 @@ namespace Api.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return Unauthorized();
+                return Unauthorized("Не авторизован");
             var employeeId = (await _employeeService.GetByUser(user.Id)).Id;
             var tasks = await _taskService.GetAllByEmployee(employeeId, @params);
             return Ok(tasks);
         }
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [AllowAnonymous]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<IActionResult> Post(TaskCreateRequest task)
         {
@@ -67,7 +68,6 @@ namespace Api.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
-        //[Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateTask(Guid taskId, TaskRequest updateTask)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -76,6 +76,9 @@ namespace Api.Controllers
             var role = await _userManager.GetRolesAsync(user);
             if (!role.Contains("ADMINISTRATOR"))
                 return Forbid();
+            var task = await _taskService.Get(taskId);
+            if (task == null)
+                return NotFound("taskId notFound");
             var taskResult = await _taskService.UpdateAsync(taskId, updateTask);
             return Ok(taskResult);
         }
@@ -90,7 +93,7 @@ namespace Api.Controllers
 
             var task = await _taskService.Get(request.TaskId);
             if (task == null)
-                return NotFound();
+                return NotFound("taskId notFound");
           
             task.IsCompleted = request.IsCompleted;
             var taskRequest = _mapper.Map<TaskRequest>(task);
