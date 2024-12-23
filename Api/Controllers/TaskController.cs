@@ -62,6 +62,7 @@ namespace Api.Controllers
             //var role = await _userManager.GetRolesAsync(user);
             //if (!role.Contains("ADMINISTRATOR"))
             //    return Forbid();
+            //
             var id = await _taskService.AddAsync(task);
             return Ok(id);
         }
